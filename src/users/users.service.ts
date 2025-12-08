@@ -11,9 +11,14 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto) {
+    // Only hash if password is not already hashed (doesn't start with $2b$)
+    const password = createUserDto.password.startsWith('$2b$')
+      ? createUserDto.password
+      : await bcrypt.hash(createUserDto.password, 10);
+
     const user = new this.userModel({
       ...createUserDto,
-      password: await bcrypt.hash(createUserDto.password, 10),
+      password,
     });
     return await user
       .save()
@@ -54,6 +59,11 @@ export class UsersService {
       .catch((error) => {
         throw new BadRequestException(error.message);
       });
+  }
+  async findByEmail(email: string) {
+    const user = await this.userModel.findOne({ email });
+    console.log(user);
+    return user;
   }
 
   async update(id: Types.ObjectId, updateUserDto: UpdateUserDto) {
