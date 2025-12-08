@@ -1,184 +1,128 @@
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../dio_client.dart';
 import '../../models/user_model.dart';
 
 class AuthApi {
-  final DioClient _dioClient = DioClient.instance;
+  final DioClient _dioClient = DioClient();
 
-  // API Endpoints
-  static const String _loginEndpoint = '/auth/login';
-  static const String _registerEndpoint = '/auth/register';
-  static const String _logoutEndpoint = '/auth/logout';
-  static const String _forgotPasswordEndpoint = '/auth/forgot-password';
-  static const String _resetPasswordEndpoint = '/auth/reset-password';
-  static const String _verifyOtpEndpoint = '/auth/verify-otp';
-  static const String _profileEndpoint = '/auth/profile';
+  AuthApi() {
+    _dioClient.init();
+  }
 
   /// Login with email and password
-  /// Returns a map containing user data and token
-  Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
-  }) async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(
-    //   _loginEndpoint,
-    //   data: {
-    //     'email': email,
-    //     'password': password,
-    //   },
-    // );
-    // return response.data;
-
-    // Placeholder response - simulating successful login
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-
-    return {
-      'success': true,
-      'message': 'Login successful',
-      'data': {
-        'user': {
-          'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
+  Future<AuthResponse> login(String email, String password) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/login',
+        data: {
           'email': email,
+          'password': password,
         },
-        'token': 'placeholder_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
-      },
-    };
+      );
+
+      final authResponse = AuthResponse.fromJson(response.data);
+      
+      // Save token to shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', authResponse.token);
+      await prefs.setString('user_id', authResponse.user.id);
+      await prefs.setString('user_email', authResponse.user.email);
+      await prefs.setString('user_name', authResponse.user.username);
+
+      return authResponse;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
   }
 
-  /// Register a new user
-  Future<Map<String, dynamic>> register({
+  /// Register with username, email, phone number and password
+  Future<AuthResponse> register({
     required String username,
     required String email,
+    required String phoneNumber,
     required String password,
-    required String phone,
   }) async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(
-    //   _registerEndpoint,
-    //   data: {
-    //     'username': username,
-    //     'email': email,
-    //     'password': password,
-    //     'phone': phone,
-    //   },
-    // );
-    // return response.data;
-
-    // Placeholder response - simulating successful registration
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-
-    return {
-      'success': true,
-      'message': 'Registration successful',
-      'data': {
-        'user': {
-          'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/register',
+        data: {
+          'username': username,
           'email': email,
+          'phoneNumber': phoneNumber,
+          'password': password,
         },
-        'token': 'placeholder_jwt_token_${DateTime.now().millisecondsSinceEpoch}',
-      },
-    };
+      );
+
+      final authResponse = AuthResponse.fromJson(response.data);
+      
+      // Save token to shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', authResponse.token);
+      await prefs.setString('user_id', authResponse.user.id);
+      await prefs.setString('user_email', authResponse.user.email);
+      await prefs.setString('user_name', authResponse.user.username);
+
+      return authResponse;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
   }
 
-  /// Logout user
-  Future<Map<String, dynamic>> logout() async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(_logoutEndpoint);
-    // return response.data;
+  /// Logout and clear stored data
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_id');
+    await prefs.remove('user_email');
+    await prefs.remove('user_name');
+  }
 
-    // Placeholder response
-    await Future.delayed(const Duration(milliseconds: 500));
+  /// Check if user is logged in
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return token != null && token.isNotEmpty;
+  }
 
+  /// Get stored user info
+  Future<Map<String, String?>> getStoredUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
     return {
-      'success': true,
-      'message': 'Logout successful',
+      'token': prefs.getString('auth_token'),
+      'userId': prefs.getString('user_id'),
+      'email': prefs.getString('user_email'),
+      'username': prefs.getString('user_name'),
     };
   }
 
-  /// Request password reset
-  Future<Map<String, dynamic>> forgotPassword({
-    required String email,
-  }) async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(
-    //   _forgotPasswordEndpoint,
-    //   data: {'email': email},
-    // );
-    // return response.data;
-
-    // Placeholder response
-    await Future.delayed(const Duration(seconds: 1));
-
-    return {
-      'success': true,
-      'message': 'Password reset email sent',
-    };
-  }
-
-  /// Verify OTP code
-  Future<Map<String, dynamic>> verifyOtp({
-    required String email,
-    required String otp,
-  }) async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(
-    //   _verifyOtpEndpoint,
-    //   data: {
-    //     'email': email,
-    //     'otp': otp,
-    //   },
-    // );
-    // return response.data;
-
-    // Placeholder response
-    await Future.delayed(const Duration(seconds: 1));
-
-    return {
-      'success': true,
-      'message': 'OTP verified successfully',
-      'data': {
-        'reset_token': 'reset_token_${DateTime.now().millisecondsSinceEpoch}',
-      },
-    };
-  }
-
-  /// Reset password with new password
-  Future<Map<String, dynamic>> resetPassword({
-    required String resetToken,
-    required String newPassword,
-  }) async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.post(
-    //   _resetPasswordEndpoint,
-    //   data: {
-    //     'reset_token': resetToken,
-    //     'new_password': newPassword,
-    //   },
-    // );
-    // return response.data;
-
-    // Placeholder response
-    await Future.delayed(const Duration(seconds: 1));
-
-    return {
-      'success': true,
-      'message': 'Password reset successful',
-    };
-  }
-
-  /// Get user profile
-  Future<AppUser> getProfile() async {
-    // TODO: Implement actual API call when backend is ready
-    // final response = await _dioClient.get(_profileEndpoint);
-    // return AppUser.fromJson(response.data['data']);
-
-    // Placeholder response
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    return AppUser(
-      id: 'placeholder_user_id',
-      email: 'user@example.com',
-    );
+  /// Handle Dio errors and return user-friendly messages
+  String _handleError(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'Connection timeout. Please check your internet connection.';
+      case DioExceptionType.connectionError:
+        return 'Unable to connect to server. Please check your internet connection.';
+      case DioExceptionType.badResponse:
+        final statusCode = e.response?.statusCode;
+        final message = e.response?.data?['message'];
+        
+        if (statusCode == 401) {
+          return message ?? 'Invalid email or password.';
+        } else if (statusCode == 409) {
+          return message ?? 'User already exists.';
+        } else if (statusCode == 400) {
+          // Handle validation errors
+          if (message is List) {
+            return message.join('\n');
+          }
+          return message ?? 'Invalid input. Please check your data.';
+        }
+        return message ?? 'An error occurred. Please try again.';
+      default:
+        return 'An unexpected error occurred. Please try again.';
+    }
   }
 }
-

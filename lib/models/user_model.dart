@@ -1,36 +1,64 @@
-class AppUser {
+class UserModel {
   final String id;
+  final String username;
   final String email;
+  final String? phoneNumber;
+  final String role;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
-  AppUser({
+  UserModel({
     required this.id,
+    required this.username,
     required this.email,
+    this.phoneNumber,
+    required this.role,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory AppUser.fromJson(Map<String, dynamic> json) {
-    return AppUser(
-      id: json['id'] as String,
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['_id'] as String? ?? json['id'] as String,
+      username: json['username'] as String,
       email: json['email'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
+      role: json['role'] as String? ?? 'user',
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null 
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'username': username,
       'email': email,
+      'phoneNumber': phoneNumber,
+      'role': role,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
-
-  @override
-  String toString() => 'AppUser(id: $id, email: $email)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is AppUser && other.id == id && other.email == email;
-  }
-
-  @override
-  int get hashCode => id.hashCode ^ email.hashCode;
 }
 
+class AuthResponse {
+  final UserModel user;
+  final String token;
+
+  AuthResponse({
+    required this.user,
+    required this.token,
+  });
+
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    return AuthResponse(
+      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+      token: json['token'] as String,
+    );
+  }
+}
