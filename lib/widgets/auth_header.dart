@@ -7,7 +7,7 @@ class AuthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 220,
+      height: 200,
       width: double.infinity,
       child: Stack(
         children: [
@@ -33,60 +33,58 @@ class GeometricBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _GeometricPainter(),
-      size: Size.infinite,
+    return ClipRect(
+      child: CustomPaint(
+        painter: _GeometricPainter(),
+        size: Size.infinite,
+      ),
     );
   }
 }
 
 class _GeometricPainter extends CustomPainter {
-  static const Color darkRed = Color(0xFF8B0000);
-  static const Color brandRed = Color(0xFFE50914);
-  static const Color darkBg = Color(0xFF1a0a0a);
+  // Colors from Figma specs
+  static const Color rect33Color = Color(0xFF260002); // Main center shape
+  static const Color rect34Color = Color(0xFF170001); // Right shape
+  static const Color rect32Color = Color(0xFF170001); // Left shape
+
+  // Rotation angle: -55.7 degrees in radians
+  static const double rotationAngle = -55.7 * 3.14159265359 / 180;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Dark background base
-    final bgPaint = Paint()
-      ..color = darkBg
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+    // Rectangle 34 (back layer - top right area)
+    // Width: 185.1px, Height: 112.17px
+    _drawRotatedRect(
+      canvas,
+      centerX: 153,  // Left (أفقي) - زوّد الرقم = يروح يمين
+      centerY: -67.04,  // Top (رأسي) - زوّد الرقم = ينزل تحت
+      width: 185.1,
+      height: 112.17,
+      color: rect34Color,
+    );
 
-    // Large dark red diamond (rotated square) - back layer
-    final darkRedPaint = Paint()
-      ..color = darkRed.withOpacity(0.8)
-      ..style = PaintingStyle.fill;
+    // Rectangle 32 (middle layer - left area)
+    // Width: 185.1px, Height: 112.17px
+    _drawRotatedRect(
+      canvas,
+      centerX: 71.55,    // Left (أفقي)
+      centerY: 95.41,   // Top (رأسي)
+      width: 185.1,
+      height: 112.17,
+      color: rect32Color,
+    );
 
-    final largeDiamond = Path();
-    largeDiamond.moveTo(size.width * 0.15, size.height * 0.1);
-    largeDiamond.lineTo(size.width * 0.55, size.height * -0.2);
-    largeDiamond.lineTo(size.width * 0.85, size.height * 0.3);
-    largeDiamond.lineTo(size.width * 0.45, size.height * 0.6);
-    largeDiamond.close();
-    canvas.drawPath(largeDiamond, darkRedPaint);
-
-    // Medium bright red diamond - middle layer
-    final brightRedPaint = Paint()
-      ..color = brandRed.withOpacity(0.9)
-      ..style = PaintingStyle.fill;
-
-    final mediumDiamond = Path();
-    mediumDiamond.moveTo(size.width * 0.0, size.height * 0.25);
-    mediumDiamond.lineTo(size.width * 0.25, size.height * -0.05);
-    mediumDiamond.lineTo(size.width * 0.55, size.height * 0.25);
-    mediumDiamond.lineTo(size.width * 0.30, size.height * 0.55);
-    mediumDiamond.close();
-    canvas.drawPath(mediumDiamond, brightRedPaint);
-
-    // Small dark diamond - top layer accent
-    final smallDiamond = Path();
-    smallDiamond.moveTo(size.width * 0.35, size.height * 0.35);
-    smallDiamond.lineTo(size.width * 0.50, size.height * 0.15);
-    smallDiamond.lineTo(size.width * 0.65, size.height * 0.35);
-    smallDiamond.lineTo(size.width * 0.50, size.height * 0.55);
-    smallDiamond.close();
-    canvas.drawPath(smallDiamond, darkRedPaint..color = darkRed.withOpacity(0.7));
+    // Rectangle 33 (front layer - center, main shape)
+    // Width: 212.12px, Height: 119.97px
+    _drawRotatedRect(
+      canvas,
+      centerX: 89.8,  // Left (أفقي)
+      centerY: 0.48,   // Top (رأسي)
+      width: 212.12,
+      height: 119.97,
+      color: rect33Color,
+    );
 
     // Gradient overlay for smooth transition to black
     final gradientPaint = Paint()
@@ -102,6 +100,35 @@ class _GeometricPainter extends CustomPainter {
         stops: const [0.0, 0.5, 0.8, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), gradientPaint);
+  }
+
+  void _drawRotatedRect(
+      Canvas canvas, {
+        required double centerX,
+        required double centerY,
+        required double width,
+        required double height,
+        required Color color,
+      }) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    canvas.save();
+
+    // Translate to the center of the rectangle
+    canvas.translate(centerX, centerY);
+
+    // Rotate around the center (like Figma does)
+    canvas.rotate(rotationAngle);
+
+    // Draw the rectangle centered at origin
+    canvas.drawRect(
+      Rect.fromCenter(center: Offset.zero, width: width, height: height),
+      paint,
+    );
+
+    canvas.restore();
   }
 
   @override
