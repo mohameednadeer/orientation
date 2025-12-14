@@ -46,6 +46,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
+    // TODO: Re-enable API call when backend is ready
+    // For now, skip API and navigate directly
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MainScreen(),
+        ),
+      );
+    }
+    
+    /* Uncomment this when backend is ready:
     try {
       await _authApi.login(email, password);
       
@@ -66,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isLoading = false);
       }
     }
+    */
   }
 
   bool _isValidEmail(String email) {

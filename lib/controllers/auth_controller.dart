@@ -9,20 +9,13 @@ class AuthController extends ChangeNotifier {
 
   AuthController({AuthApi? authApi}) : _authApi = authApi ?? AuthApi();
 
-  /// Sets the API base URL
-  void setApiBaseUrl(String url) {
-    _authApi.setBaseUrl(url);
-  }
-
   /// Login with email and password
-  /// TODO: Replace placeholder handling with real API logic
   Future<bool> login(String email, String password) async {
     try {
       loading = true;
       errorMessage = null;
       notifyListeners();
 
-      // Placeholder: Will call real API when available
       await _authApi.login(email, password);
 
       loading = false;
@@ -30,31 +23,50 @@ class AuthController extends ChangeNotifier {
       return true;
     } catch (e) {
       loading = false;
-      errorMessage = "Placeholder: ${e.toString()}";
+      errorMessage = e.toString();
       notifyListeners();
       return false;
     }
   }
 
-  /// Register with email and password
-  /// TODO: Replace placeholder handling with real API logic
-  Future<bool> register(String email, String password) async {
+  /// Register with username, email, phone and password
+  Future<bool> register({
+    required String username,
+    required String email,
+    required String phoneNumber,
+    required String password,
+  }) async {
     try {
       loading = true;
       errorMessage = null;
       notifyListeners();
 
-      // Placeholder: Will call real API when available
-      await _authApi.register(email, password);
+      await _authApi.register(
+        username: username,
+        email: email,
+        phoneNumber: phoneNumber,
+        password: password,
+      );
 
       loading = false;
       notifyListeners();
       return true;
     } catch (e) {
       loading = false;
-      errorMessage = "Placeholder: ${e.toString()}";
+      errorMessage = e.toString();
       notifyListeners();
       return false;
     }
+  }
+
+  /// Logout
+  Future<void> logout() async {
+    await _authApi.logout();
+    notifyListeners();
+  }
+
+  /// Check if user is logged in
+  Future<bool> isLoggedIn() async {
+    return await _authApi.isLoggedIn();
   }
 }

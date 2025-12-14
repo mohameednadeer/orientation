@@ -45,7 +45,7 @@ class GeometricBackground extends StatelessWidget {
 class _GeometricPainter extends CustomPainter {
   // Colors from Figma specs
   static const Color rect33Color = Color(0xFF260002); // Main center shape
-  static const Color rect34Color = Color(0xFF170001); // Right shape
+  static const Color rect34Color = Color(0xFF170001); // Right shape  
   static const Color rect32Color = Color(0xFF170001); // Left shape
 
   // Rotation angle: -55.7 degrees in radians
@@ -103,31 +103,31 @@ class _GeometricPainter extends CustomPainter {
   }
 
   void _drawRotatedRect(
-      Canvas canvas, {
-        required double centerX,
-        required double centerY,
-        required double width,
-        required double height,
-        required Color color,
-      }) {
+    Canvas canvas, {
+    required double centerX,
+    required double centerY,
+    required double width,
+    required double height,
+    required Color color,
+  }) {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
     canvas.save();
-
+    
     // Translate to the center of the rectangle
     canvas.translate(centerX, centerY);
-
+    
     // Rotate around the center (like Figma does)
     canvas.rotate(rotationAngle);
-
+    
     // Draw the rectangle centered at origin
     canvas.drawRect(
       Rect.fromCenter(center: Offset.zero, width: width, height: height),
       paint,
     );
-
+    
     canvas.restore();
   }
 
