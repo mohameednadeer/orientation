@@ -16,6 +16,8 @@ import { Role } from 'src/roles/roles.enum';
 import { Roles } from 'src/roles/roles.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/roles/roles.guard';
+import { post } from 'axios';
+import { CreateDeveloperDto } from './dto/create-developer.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,10 +25,17 @@ export class UsersController {
 
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
+
+  // @Post('developer')
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN, Role.SUPERADMIN)
+  // createDeveloper(@Body() createDeveloperDto: CreateDeveloperDto) {
+  //   return this.usersService.createDeveloper(createDeveloperDto);
+  // }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)

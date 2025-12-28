@@ -5,10 +5,15 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { CreateDeveloperDto } from './dto/create-developer.dto';
+// import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    // private readonly mailService: MailService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     // Only hash if password is not already hashed (doesn't start with $2b$)

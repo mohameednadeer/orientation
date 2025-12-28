@@ -5,6 +5,10 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ProjectsModule } from './projects/projects.module';
+import { DeveloperModule } from './developer/developer.module';
+import { EpisodesModule } from './episodes/episodes.module';
+import { ReelsModule } from './reels/reels.module';
 
 @Module({
   imports: [
@@ -21,9 +25,12 @@ import { MongooseModule } from '@nestjs/mongoose';
       },
       inject: [ConfigService],
     }),
-
     AuthModule,
     UsersModule,
+    ProjectsModule,
+    DeveloperModule,
+    EpisodesModule,
+    ReelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
