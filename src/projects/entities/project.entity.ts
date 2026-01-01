@@ -18,7 +18,7 @@ export class Project {
   status: 'PLANNING' | 'CONSTRUCTION' | 'COMPLETED' | 'DELIVERED';
 
   @Prop({ type: Types.ObjectId, ref: 'Developer', required: true })
-  developerId: Types.ObjectId;
+  developer: Types.ObjectId;
 
   @Prop({ required: true })
   script: string;
@@ -32,24 +32,23 @@ export class Project {
   @Prop({ type: Types.ObjectId, ref: 'Inventory' })
   inventory: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'File' })
+  pdfUrl: Types.ObjectId;
+
   @Prop({ required: true })
   heroImage: string;
 
-  // Admin-controlled flag to highlight project in hero sections and promotions
-  @Prop({ default: false })
-  featured: boolean;
+  @Prop({ type: String, required: false })
+  whatsappNumber?: string;
 
-  // @Prop({ default: 0 })
-  // trendingScore: number;
+  @Prop({ default: 0 })
+  trendingScore: number;
 
-  // @Prop({ default: 0 })
-  // saveCount: number;
+  @Prop({ default: 0 })
+  saveCount: number;
 
-  // @Prop({ default: 0 })
-  // viewCount: number;
-
-  // @Prop({ default: 0 })
-  // shareCount: number;
+  @Prop({ default: 0 })
+  viewCount: number;
 
   @Prop()
   deletedAt?: Date;
@@ -58,7 +57,6 @@ export class Project {
 export const ProjectSchema = SchemaFactory.createForClass(Project);
 
 // Single field indexes
-// Note: slug already has an index from unique: true constraint, so no need to add it manually
 ProjectSchema.index({ developerId: 1 }); // Filter by developer
 
 // Compound indexes following ESR rule (Equality, Sort, Range)

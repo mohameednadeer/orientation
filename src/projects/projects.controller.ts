@@ -9,6 +9,7 @@ import {
   Query,
   Put,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -19,6 +20,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { Role } from 'src/roles/roles.enum';
+import { Types } from 'mongoose';
 
 @Controller('projects')
 export class ProjectsController {
@@ -36,15 +38,10 @@ export class ProjectsController {
     return this.projectsService.findAll(queryProjectDto);
   }
 
-  // Suggested endpoints - implement these methods in ProjectsService
-  @Get('featured')
-  findFeaturedProjects(@Query('limit') limit?: string) {
-    // return this.projectsService.findFeatured(limit);
-  }
-
   @Get('trending')
   findTrendingProjects(@Query('limit') limit?: string) {
-    // return this.projectsService.findTrending(limit);
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.projectsService.findTrending(limitNum);
   }
 
   @Get(':id')
@@ -70,16 +67,24 @@ export class ProjectsController {
   }
 
   // Engagement Metrics - TODO: Implement these methods in ProjectsService
-  @Put(':id/increment-view')
+  @Patch(':id/increment-view')
   @UseGuards(AuthGuard)
   incrementViewCount(@Param() params: MongoIdDto) {
-    // return this.projectsService.incrementViewCount(params.id);
+    return this.projectsService.incrementViewCount(params.id);
   }
 
-  @Put(':id/increment-save')
+  @Patch(':id/save-project')
   @UseGuards(AuthGuard)
-  incrementSaveCount(@Param() params: MongoIdDto) {
-    // return this.projectsService.incrementSaveCount(params.id);
+  saveProject(@Param() params: MongoIdDto, @Request() req: any) {
+    const userId = new Types.ObjectId(req.user.sub);
+    return this.projectsService.saveProject(params.id, userId);
+  }
+
+  @Patch(':id/unsave-project')
+  @UseGuards(AuthGuard)
+  unsaveProject(@Param() params: MongoIdDto, @Request() req: any) {
+    const userId = new Types.ObjectId(req.user.sub);
+    return this.projectsService.unsaveProject(params.id, userId);
   }
 
   @Put(':id/increment-share')
@@ -101,20 +106,5 @@ export class ProjectsController {
   @Roles(Role.SUPERADMIN, Role.ADMIN)
   unpublishProject(@Param() params: MongoIdDto) {
     // return this.projectsService.unpublish(params.id);
-  }
-
-  // Featured Management - TODO: Implement these methods in ProjectsService
-  @Put(':id/feature')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.SUPERADMIN, Role.ADMIN)
-  featureProject(@Param() params: MongoIdDto) {
-    // return this.projectsService.feature(params.id);
-  }
-
-  @Put(':id/unfeature')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.SUPERADMIN, Role.ADMIN)
-  unfeatureProject(@Param() params: MongoIdDto) {
-    // return this.projectsService.unfeature(params.id);
   }
 }

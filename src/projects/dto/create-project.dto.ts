@@ -10,6 +10,7 @@ import {
   IsBoolean,
   IsDateString,
   Min,
+  IsPhoneNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
@@ -19,14 +20,10 @@ export class CreateProjectDto {
   @IsNotEmpty()
   title: string;
 
-  @IsString()
-  @IsNotEmpty()
-  slug: string;
-
   @IsMongoId()
   @IsNotEmpty()
   @Type(() => Types.ObjectId)
-  developerId: Types.ObjectId;
+  developer: Types.ObjectId;
 
   @IsString()
   @IsNotEmpty()
@@ -55,8 +52,12 @@ export class CreateProjectDto {
   @IsNotEmpty()
   heroImage: string;
 
-  @IsBoolean()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Boolean)
-  featured?: boolean;
+  @Type(() => Types.ObjectId)
+  pdfUrl?: Types.ObjectId;
+
+  @IsPhoneNumber()
+  @IsOptional()
+  whatsappNumber?: string;
 }

@@ -7,8 +7,7 @@ import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProjectsModule } from './projects/projects.module';
 import { DeveloperModule } from './developer/developer.module';
-import { EpisodesModule } from './episodes/episodes.module';
-import { ReelsModule } from './reels/reels.module';
+;
 
 @Module({
   imports: [
@@ -29,8 +28,6 @@ import { ReelsModule } from './reels/reels.module';
     UsersModule,
     ProjectsModule,
     DeveloperModule,
-    EpisodesModule,
-    ReelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,12 +3,16 @@ import { ProjectsService } from './projects.service';
 import { ProjectsController } from './projects.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Project, ProjectSchema } from './entities/project.entity';
+import { User, UserSchema } from 'src/users/entities/user.entity';
 import { DeveloperModule } from 'src/developer/developer.module';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Project.name, schema: ProjectSchema }]),
+    MongooseModule.forFeature([
+      { name: Project.name, schema: ProjectSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
     DeveloperModule,
     AuthModule,
   ],

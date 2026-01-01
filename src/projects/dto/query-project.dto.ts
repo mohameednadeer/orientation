@@ -3,13 +3,11 @@ import {
   IsString,
   IsEnum,
   IsMongoId,
-  IsBoolean,
   IsNumber,
-  IsArray,
   Min,
   Max,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 
 export enum ProjectStatus {
   PLANNING = 'PLANNING',
@@ -21,7 +19,8 @@ export enum ProjectStatus {
 export enum SortBy {
   NEWEST = 'newest',
   TRENDING = 'trending',
-  PRICE = 'price',
+  SAVE_COUNT = 'saveCount',
+  VIEW_COUNT = 'viewCount',
 }
 
 export class QueryProjectDto {
@@ -38,36 +37,12 @@ export class QueryProjectDto {
   status?: ProjectStatus;
 
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return value.split(',').filter((tag) => tag.trim().length > 0);
-    }
-    return value;
-  })
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @IsString()
+  title?: string;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return value;
-  })
-  featured?: boolean;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  minPrice?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  maxPrice?: number;
+  @IsString()
+  slug?: string;
 
   @IsOptional()
   @IsNumber()

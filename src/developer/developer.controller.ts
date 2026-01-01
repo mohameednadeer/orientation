@@ -53,6 +53,8 @@ export class DeveloperController {
     return this.developerService.updateDeveloper(params.id, updateDeveloperDto);
   }
 
+
+  // update developer project script
   @Patch(':id/project')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.DEVELOPER, Role.ADMIN, Role.SUPERADMIN)
