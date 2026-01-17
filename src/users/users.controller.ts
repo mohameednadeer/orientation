@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -50,9 +51,21 @@ export class UsersController {
   findOne(@Param() params: MongoIdDto) {
     return this.usersService.findOne(params.id);
   }
-
-  @Patch(':id')
+  
+  // user update own profile only
+  @Patch('profile')
   @UseGuards(AuthGuard)
+  updateProfile(
+    @Req() req: any,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(req.user.sub, updateUserDto);
+  }
+
+  // admin update user
+  @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   update(@Param() params: MongoIdDto, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(params.id, updateUserDto);
   }

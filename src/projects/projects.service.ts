@@ -102,10 +102,13 @@ export class ProjectsService {
   findAll(query: QueryProjectDto) {
     const { developerId, location, status, title, slug, limit, page, sortBy } =
       query;
-      // Populate developer with name and logoUrl and episodes and reels
-    const mongoQuery = this.projectModel.find({ deletedAt: null })
-    mongoQuery.populate('developer' , 'name logoUrl');
-    mongoQuery.populate('episodes' , 'title thumbnail episodeUrl episodeOrder duration');
+    // Populate developer with name and logoUrl and episodes and reels
+    const mongoQuery = this.projectModel.find({ deletedAt: null });
+    mongoQuery.populate('developer', 'name logoUrl');
+    mongoQuery.populate(
+      'episodes',
+      'title thumbnail episodeUrl episodeOrder duration',
+    );
     mongoQuery.populate('reels', 'title videoUrl thumbnail');
     if (developerId) {
       mongoQuery.where('developer').equals(developerId);
@@ -313,6 +316,44 @@ export class ProjectsService {
     return {
       message: 'Project deleted successfully',
       project: deletedProject,
+    };
+  }
+
+  async publish(id: Types.ObjectId) {
+    const project = await this.projectModel.findById(id);
+    if (!project) {
+      throw new BadRequestException('Project not found');
+    }
+    if (project.published) {
+      return { message: 'Project is already published', project };
+    }
+    const publishedProject = await this.projectModel.findByIdAndUpdate(
+      id,
+      { published: true, publishedAt: new Date() },
+      { new: true },
+    );
+    return {
+      message: 'Project published successfully',
+      project: publishedProject,
+    };
+  }
+
+  async unpublish(id: Types.ObjectId) {
+    const project = await this.projectModel.findById(id);
+    if (!project) {
+      throw new BadRequestException('Project not found');
+    }
+    if (!project.published) {
+      return { message: 'Project is already unpublished', project };
+    }
+    const unpublishedProject = await this.projectModel.findByIdAndUpdate(
+      id,
+      { published: false, publishedAt: null },
+      { new: true },
+    );
+    return {
+      message: 'Project unpublished successfully',
+      project: unpublishedProject,
     };
   }
 }

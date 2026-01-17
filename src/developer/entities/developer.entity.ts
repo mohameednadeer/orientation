@@ -8,7 +8,7 @@ export class Developer {
   @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false , unique: true, lowercase: true})
   email?: string;
 
   @Prop({required: true})

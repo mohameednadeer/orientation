@@ -31,7 +31,7 @@ export class DeveloperService {
   }
 
   findOneDeveloper(id: Types.ObjectId) {
-    return this.developerModel.findById(id).populate('projects name');
+    return this.developerModel.findById(id).populate('projects');
   }
 
   async findByName(name: string): Promise<DeveloperDoc | null> {
@@ -41,30 +41,38 @@ export class DeveloperService {
     });
   }
 
-  async createDeveloper(
-    createDeveloperDto: CreateDeveloperDto,
-    logo?: Express.Multer.File,
-  ) {
-    // Upload logo to S3 if provided
-    let logoUrl: string | undefined;
-    if (logo) {
-      const { url } = await this.s3Service.uploadFile(logo, 'images');
-      logoUrl = url;
+  async createDeveloper(createDeveloperDto: CreateDeveloperDto) {
+    const developerExists = await this.findByName(createDeveloperDto.name);
+    console.log(developerExists);
+    if (developerExists) {
+      throw new BadRequestException('Developer with this name already exists');
     }
 
-    // Create developer with S3 URLs
-    const developerData: any = {
+    const emailExists = await this.developerModel.findOne({
+      email: createDeveloperDto.email,
+      deletedAt: null,
+    });
+    if (emailExists) {
+      throw new BadRequestException('Developer with this email already exists');
+    }
+
+    const developer = new this.developerModel({
       ...createDeveloperDto,
-    };
-
-    // Add logo URL if uploaded
-    if (logoUrl) {
-      developerData.logo = logoUrl;
-    }
-
-    return await this.developerModel.create(developerData);
+    });
+    return await developer
+      .save()
+      .then((dev) => {
+        return {
+          message: 'Developer created successfully',
+          developer: dev,
+        };
+      })
+      .catch((error) => {
+        throw new BadRequestException(error.message);
+      });
   }
 
+  // update developer project script by developer
   async updateDeveloperScript(
     id: Types.ObjectId,
     updateDeveloperScriptDto: UpdateDeveloperScriptDto,
@@ -86,6 +94,7 @@ export class DeveloperService {
       });
   }
 
+  // update developer details by admin or superadmin
   async updateDeveloper(
     id: Types.ObjectId,
     updateDeveloperDto: UpdateDeveloperDto,
@@ -119,7 +128,18 @@ export class DeveloperService {
       });
   }
 
-  remove(id: Types.ObjectId) {
-    return `This action removes a #${id} developer`;
+  async remove(id: Types.ObjectId) {
+    try {
+      const deletedDeveloper = await this.developerModel.findByIdAndDelete(id);
+      if (!deletedDeveloper) {
+        throw new BadRequestException('Developer not found');
+      }
+      return {
+        message: 'Developer deleted successfully',
+        developer: deletedDeveloper,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

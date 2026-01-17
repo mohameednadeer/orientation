@@ -17,6 +17,9 @@ export class Project {
   @Prop({ required: true })
   location: string;
 
+  @Prop({ required: false, default: null })
+  mapsLocation?: string;
+
   @Prop({ enum: ['PLANNING', 'CONSTRUCTION', 'COMPLETED', 'DELIVERED'] })
   status: 'PLANNING' | 'CONSTRUCTION' | 'COMPLETED' | 'DELIVERED';
 
@@ -52,6 +55,12 @@ export class Project {
 
   @Prop({ default: 0 })
   viewCount: number;
+
+  @Prop({ default: false })
+  published: boolean;
+
+  @Prop({ required: false })
+  publishedAt?: Date;
 
   @Prop()
   deletedAt?: Date;

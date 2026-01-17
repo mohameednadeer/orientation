@@ -93,7 +93,6 @@ export class ProjectsController {
     return this.projectsService.remove(params.id);
   }
 
-  // Engagement Metrics - TODO: Implement these methods in ProjectsService
   @Patch(':id/increment-view')
   @UseGuards(AuthGuard)
   incrementViewCount(@Param() params: MongoIdDto) {
@@ -114,24 +113,23 @@ export class ProjectsController {
     return this.projectsService.unsaveProject(params.id, userId);
   }
 
-  @Put(':id/increment-share')
-  @UseGuards(AuthGuard)
-  incrementShareCount(@Param() params: MongoIdDto) {
-    // return this.projectsService.incrementShareCount(params.id);
-  }
+  // @Put(':id/increment-share')
+  // @UseGuards(AuthGuard)
+  // incrementShareCount(@Param() params: MongoIdDto) {
+  // return this.projectsService.incrementShareCount(params.id);
+  // }
 
-  // Publishing - TODO: Implement these methods in ProjectsService
   @Put(':id/publish')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.SUPERADMIN, Role.ADMIN)
   publishProject(@Param() params: MongoIdDto) {
-    // return this.projectsService.publish(params.id);
+    return this.projectsService.publish(params.id);
   }
 
   @Put(':id/unpublish')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.SUPERADMIN, Role.ADMIN)
   unpublishProject(@Param() params: MongoIdDto) {
-    // return this.projectsService.unpublish(params.id);
+    return this.projectsService.unpublish(params.id);
   }
 }

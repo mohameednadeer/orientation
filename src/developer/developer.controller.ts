@@ -7,10 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
-  UseInterceptors,
-  UploadedFiles,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { DeveloperService } from './developer.service';
 import { CreateDeveloperDto } from './dto/create-developer.dto';
 import { UpdateDeveloperDto } from './dto/update-developer.dto';
@@ -42,23 +39,8 @@ export class DeveloperController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.SUPERADMIN)
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'logo', maxCount: 1 },
-    ]),
-  )
-  create(
-    @Body() createDeveloperDto: CreateDeveloperDto,
-    @UploadedFiles()
-    files: {
-      logo?: Express.Multer.File[];
-    },
-  ) {
-    const logo = files?.logo?.[0];
-    return this.developerService.createDeveloper(
-      createDeveloperDto,
-      logo,
-    );
+  create(@Body() createDeveloperDto: CreateDeveloperDto) {
+    return this.developerService.createDeveloper(createDeveloperDto);
   }
 
   @Patch(':id')
@@ -71,13 +53,18 @@ export class DeveloperController {
     return this.developerService.updateDeveloper(params.id, updateDeveloperDto);
   }
 
-
   // update developer project script
   @Patch(':id/project')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.DEVELOPER, Role.ADMIN, Role.SUPERADMIN)
-  updateDeveloperProject(@Param() params: MongoIdDto, @Body() updateDeveloperScriptDto: UpdateDeveloperScriptDto) {  
-    return this.developerService.updateDeveloperScript(params.id, updateDeveloperScriptDto);
+  updateDeveloperProject(
+    @Param() params: MongoIdDto,
+    @Body() updateDeveloperScriptDto: UpdateDeveloperScriptDto,
+  ) {
+    return this.developerService.updateDeveloperScript(
+      params.id,
+      updateDeveloperScriptDto,
+    );
   }
 
   @Delete(':id')

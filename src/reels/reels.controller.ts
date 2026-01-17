@@ -71,8 +71,8 @@ export class ReelsController {
     return this.reelsService.findAllReels();
   }
 
-  // Put specific routes BEFORE dynamic routes
-  @Get('saved') // Changed from ':id/saved' to just 'saved'
+  
+  @Get('saved') 
   @UseGuards(AuthGuard)
   getSavedReelsByUser(@Req() req: any) {
     return this.reelsService.getSavedReelsByUser(req.user.sub);

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Model, Types } from 'mongoose';
@@ -53,49 +57,93 @@ export class UsersService {
   }
 
   async findOne(id: Types.ObjectId) {
-    return await this.userModel
-      .findById(id)
-      .then((user) => {
-        return {
-          message: 'User fetched successfully',
-          user,
-        };
-      })
-      .catch((error) => {
-        throw new BadRequestException(error.message);
-      });
+    try {
+      const user = await this.userModel.findById(id);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        message: 'User fetched successfully',
+        user,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
   }
+
   async findByEmail(email: string) {
     const user = await this.userModel.findOne({ email });
-    console.log(user);
+    if (!user) {
+      return null;
+    }
     return user;
   }
 
   async update(id: Types.ObjectId, updateUserDto: UpdateUserDto) {
-    return await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .then((user) => {
-        return {
-          message: 'User updated successfully',
-          user,
-        };
-      })
-      .catch((error) => {
-        throw new BadRequestException(error.message);
+    try {
+      const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+        runValidators: true,
       });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        message: 'User updated successfully',
+        user,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async updateprofile(id: Types.ObjectId, updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return {
+        message: 'User profile updated successfully',
+        user,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 
   async remove(id: Types.ObjectId) {
-    return await this.userModel
-      .findByIdAndDelete(id)
-      .then((user) => {
-        return {
-          message: 'User deleted successfully',
-          user,
-        };
-      })
-      .catch((error) => {
-        throw new BadRequestException(error.message);
-      });
+    try {
+      const user = await this.userModel.findByIdAndDelete(id);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        message: 'User deleted successfully',
+        user,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 }
