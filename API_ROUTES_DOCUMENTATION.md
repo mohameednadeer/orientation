@@ -9,12 +9,14 @@ This document contains all routes in the Orientation App Backend project, includ
 ## 1. App Controller
 
 ### GET `/`
+
 **Description**: Returns a simple hello world message  
 **Authentication**: None  
 **Request**: None  
-**Response**: 
+**Response**:
+
 ```typescript
-string // "Hello World!"
+string; // "Hello World!"
 ```
 
 ---
@@ -22,17 +24,20 @@ string // "Hello World!"
 ## 2. Auth Controller (`/auth`)
 
 ### POST `/auth/login`
+
 **Description**: Login endpoint for users  
 **Authentication**: None  
 **Request Body** (`LoginDto`):
+
 ```typescript
 {
-  email: string;        // Valid email address (required)
-  password: string;     // 8-20 characters (required)
+  email: string; // Valid email address (required)
+  password: string; // 8-20 characters (required)
 }
 ```
 
 **Response**:
+
 ```typescript
 {
   user: {
@@ -52,19 +57,22 @@ string // "Hello World!"
 ---
 
 ### POST `/auth/register`
+
 **Description**: Register a new user  
 **Authentication**: None  
 **Request Body** (`RegisterDto`):
+
 ```typescript
 {
-  username: string;     // Required
-  email: string;        // Valid email address (required)
-  phoneNumber: string;  // Valid phone number (required)
-  password: string;     // 8-20 characters (required)
+  username: string; // Required
+  email: string; // Valid email address (required)
+  phoneNumber: string; // Valid phone number (required)
+  password: string; // 8-20 characters (required)
 }
 ```
 
 **Response**:
+
 ```typescript
 {
   user: {
@@ -86,16 +94,18 @@ string // "Hello World!"
 ## 3. Users Controller (`/users`)
 
 ### POST `/users`
+
 **Description**: Create a new admin user  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN`  
 **Request Body** (`CreateUserDto`):
+
 ```typescript
 {
-  username: string;     // Required
-  email: string;        // Valid email address (required)
-  phoneNumber: string;  // Valid phone number (required)
-  password: string;     // 8-20 characters, must contain: uppercase, lowercase, number, special char (required)
+  username: string; // Required
+  email: string; // Valid email address (required)
+  phoneNumber: string; // Valid phone number (required)
+  password: string; // 8-20 characters, must contain: uppercase, lowercase, number, special char (required)
 }
 ```
 
@@ -104,6 +114,7 @@ string // "Hello World!"
 ---
 
 ### GET `/users`
+
 **Description**: Get all users  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
@@ -113,13 +124,15 @@ string // "Hello World!"
 ---
 
 ### GET `/users/:id`
+
 **Description**: Get a user by ID  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -128,17 +141,20 @@ string // "Hello World!"
 ---
 
 ### PATCH `/users/:id`
+
 **Description**: Update a user  
 **Authentication**: Required (`AuthGuard`)  
 **Required Role**: Any authenticated user  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
 **Request Body** (`UpdateUserDto` - all fields optional):
+
 ```typescript
 {
   username?: string;
@@ -153,13 +169,15 @@ string // "Hello World!"
 ---
 
 ### DELETE `/users/:id`
+
 **Description**: Delete a user  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -170,11 +188,13 @@ string // "Hello World!"
 ## 4. Projects Controller (`/projects`)
 
 ### POST `/projects`
+
 **Description**: Create a new project  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Request Type**: `multipart/form-data`  
 **Request Body** (`CreateProjectDto`):
+
 ```typescript
 {
   title: string;                    // Required
@@ -191,6 +211,7 @@ string // "Hello World!"
 ```
 
 **Files**:
+
 - `logo`: File (max 1GB, single file)
 - `heroVideo`: File (max 1GB, single file)
 
@@ -199,9 +220,11 @@ string // "Hello World!"
 ---
 
 ### GET `/projects`
+
 **Description**: Get all projects with filtering and pagination  
 **Authentication**: None  
 **Query Parameters** (`QueryProjectDto` - all optional):
+
 ```typescript
 {
   developerId?: string;             // MongoDB ObjectId
@@ -220,9 +243,11 @@ string // "Hello World!"
 ---
 
 ### GET `/projects/trending`
+
 **Description**: Get trending projects  
 **Authentication**: None  
 **Query Parameters**:
+
 ```typescript
 {
   limit?: string;  // Converted to number, default: 10
@@ -234,12 +259,14 @@ string // "Hello World!"
 ---
 
 ### GET `/projects/:id`
+
 **Description**: Get a project by ID  
 **Authentication**: None  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -248,17 +275,20 @@ string // "Hello World!"
 ---
 
 ### PATCH `/projects/:id`
+
 **Description**: Update a project  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
 **Request Body** (`UpdateProjectDto` - all fields optional, same as CreateProjectDto):
+
 ```typescript
 {
   title?: string;
@@ -279,13 +309,15 @@ string // "Hello World!"
 ---
 
 ### DELETE `/projects/:id`
+
 **Description**: Delete a project  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -294,13 +326,15 @@ string // "Hello World!"
 ---
 
 ### PATCH `/projects/:id/increment-view`
+
 **Description**: Increment view count for a project  
 **Authentication**: Required (`AuthGuard`)  
 **Required Role**: Any authenticated user  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -309,13 +343,15 @@ string // "Hello World!"
 ---
 
 ### PATCH `/projects/:id/save-project`
+
 **Description**: Save a project to user's saved projects  
 **Authentication**: Required (`AuthGuard`)  
 **Required Role**: Any authenticated user  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -326,13 +362,15 @@ string // "Hello World!"
 ---
 
 ### PATCH `/projects/:id/unsave-project`
+
 **Description**: Remove a project from user's saved projects  
 **Authentication**: Required (`AuthGuard`)  
 **Required Role**: Any authenticated user  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -342,54 +380,58 @@ string // "Hello World!"
 
 ---
 
-### PUT `/projects/:id/increment-share`
-**Description**: Increment share count for a project (Not Implemented - TODO)  
-**Authentication**: Required (`AuthGuard`)  
-**Required Role**: Any authenticated user  
-**Route Parameters** (`MongoIdDto`):
-```typescript
-{
-  id: string;  // Valid MongoDB ObjectId (required)
-}
-```
-
-**Response**: Currently returns nothing (method not implemented)
-
----
-
 ### PUT `/projects/:id/publish`
-**Description**: Publish a project (Not Implemented - TODO)  
+
+**Description**: Publish a project  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
-**Response**: Currently returns nothing (method not implemented)
+**Response**:
+
+```typescript
+{
+  message: string; // "Project published successfully"
+  project: Project; // Updated project object with published=true and publishedAt=current timestamp
+}
+```
 
 ---
 
 ### PUT `/projects/:id/unpublish`
-**Description**: Unpublish a project (Not Implemented - TODO)  
+
+**Description**: Unpublish a project  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `SUPERADMIN` or `ADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
-**Response**: Currently returns nothing (method not implemented)
+**Response**:
+
+```typescript
+{
+  message: string; // "Project unpublished successfully"
+  project: Project; // Updated project object with published=false and publishedAt=null
+}
+```
 
 ---
 
 ## 5. Developer Controller (`/developer`)
 
 ### GET `/developer`
+
 **Description**: Get all developers  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
@@ -399,13 +441,15 @@ string // "Hello World!"
 ---
 
 ### GET `/developer/:id`
+
 **Description**: Get a developer by ID  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -414,11 +458,13 @@ string // "Hello World!"
 ---
 
 ### POST `/developer`
+
 **Description**: Create a new developer  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Request Type**: `multipart/form-data`  
 **Request Body** (`CreateDeveloperDto`):
+
 ```typescript
 {
   name: string;              // Required
@@ -430,6 +476,7 @@ string // "Hello World!"
 ```
 
 **Files**:
+
 - `logo`: File (single file, optional)
 
 **Response**: Developer object
@@ -437,17 +484,20 @@ string // "Hello World!"
 ---
 
 ### PATCH `/developer/:id`
+
 **Description**: Update a developer  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
 **Request Body** (`UpdateDeveloperDto` - all fields optional):
+
 ```typescript
 {
   name?: string;
@@ -463,20 +513,23 @@ string // "Hello World!"
 ---
 
 ### PATCH `/developer/:id/project`
+
 **Description**: Update developer's project script  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `DEVELOPER`, `ADMIN`, or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
 **Request Body** (`UpdateDeveloperScriptDto`):
+
 ```typescript
 {
-  script: string;  // Required
+  script: string; // Required
 }
 ```
 
@@ -485,13 +538,15 @@ string // "Hello World!"
 ---
 
 ### DELETE `/developer/:id`
+
 **Description**: Delete a developer  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -501,14 +556,14 @@ string // "Hello World!"
 
 ## 6. Episode Controller (`/episode`)
 
-**Note**: All routes in this controller require `AuthGuard` at the controller level.
-
 ### POST `/episode`
+
 **Description**: Upload/create a new episode  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Request Type**: `multipart/form-data`  
 **Request Body** (`CreateEpisodeDto`):
+
 ```typescript
 {
   projectId: string;      // MongoDB ObjectId (required)
@@ -520,29 +575,40 @@ string // "Hello World!"
 ```
 
 **Files**:
+
 - `file`: Video file (max 5GB, required)
 
 **Note**: User ID is extracted from JWT token (`req.user.sub`)
 
-**Response**: Episode object
+**Response**:
+
+```typescript
+{
+  message: string; // "Episode uploaded successfully"
+  episode: Episode; // Created episode object
+}
+```
 
 ---
 
 ### GET `/episode`
+
 **Description**: Get all episodes  
-**Authentication**: Required (`AuthGuard`)  
+**Authentication**: None  
 **Request**: None  
 **Response**: Array of episode objects
 
 ---
 
 ### GET `/episode/:id`
+
 **Description**: Get an episode by ID  
-**Authentication**: Required (`AuthGuard`)  
+**Authentication**: None  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
@@ -551,17 +617,20 @@ string // "Hello World!"
 ---
 
 ### PATCH `/episode/:id`
+
 **Description**: Update an episode  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
 **Request Body** (`UpdateEpisodeDto` - all fields optional):
+
 ```typescript
 {
   title?: string;
@@ -577,27 +646,210 @@ string // "Hello World!"
 ---
 
 ### DELETE `/episode/:id`
+
 **Description**: Delete an episode  
 **Authentication**: Required (`AuthGuard`, `RolesGuard`)  
 **Required Role**: `ADMIN` or `SUPERADMIN`  
 **Route Parameters** (`MongoIdDto`):
+
 ```typescript
 {
-  id: string;  // Valid MongoDB ObjectId (required)
+  id: string; // Valid MongoDB ObjectId (required)
 }
 ```
 
-**Response**: Deletion confirmation
+**Response**:
+
+```typescript
+{
+  message: string; // Deletion confirmation message
+}
+```
 
 ---
 
-## 7. S3/Upload Controller (`/upload`)
+## 7. Reels Controller (`/reels`)
+
+### POST `/reels`
+
+**Description**: Upload a new reel with video and thumbnail  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Request Type**: `multipart/form-data`  
+**Request Body** (`CreateReelDto`):
+
+```typescript
+{
+  title: string;          // Required
+  description?: string;   // Optional
+  projectId?: string;     // MongoDB ObjectId (optional)
+}
+```
+
+**Files**:
+
+- `file`: Video file (max 5GB, required)
+- `thumbnail`: Thumbnail image file (required)
+
+**Response**:
+
+```typescript
+{
+  message: string; // "Reel uploaded successfully"
+  reel: Reel; // Created reel object
+}
+```
+
+---
+
+### GET `/reels`
+
+**Description**: Get all reels  
+**Authentication**: None  
+**Request**: None  
+**Response**: Array of reel objects
+
+---
+
+### GET `/reels/saved`
+
+**Description**: Get all reels saved by the current user  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Request**: None  
+**Note**: User ID is extracted from JWT token (`req.user.sub`)
+
+**Response**: Array of saved reel objects
+
+---
+
+### GET `/reels/:id`
+
+**Description**: Get a reel by ID  
+**Authentication**: None  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: Reel object
+
+---
+
+### PATCH `/reels/:id`
+
+**Description**: Update a reel  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Request Body** (`UpdateReelDto` - all fields optional):
+
+```typescript
+{
+  title?: string;
+  description?: string;
+  videoUrl?: string;
+  thumbnail?: string;
+  projectId?: string;     // MongoDB ObjectId
+}
+```
+
+**Response**: Updated reel object
+
+---
+
+### DELETE `/reels/:id`
+
+**Description**: Delete a reel  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**:
+
+```typescript
+{
+  message: string; // Deletion confirmation message
+}
+```
+
+---
+
+### POST `/reels/:id/save`
+
+**Description**: Save a reel to user's saved reels  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Note**: User ID is extracted from JWT token (`req.user.sub`)
+
+**Response**:
+
+```typescript
+{
+  message: string; // Success message
+}
+```
+
+---
+
+### POST `/reels/:id/unsave`
+
+**Description**: Remove a reel from user's saved reels  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Note**: User ID is extracted from JWT token (`req.user.sub`)
+
+**Response**:
+
+```typescript
+{
+  message: string; // Success message
+}
+```
+
+---
+
+## 8. S3/Upload Controller (`/upload`)
 
 ### POST `/upload`
+
 **Description**: Upload a file to S3  
 **Authentication**: None  
 **Request Type**: `multipart/form-data`  
 **Request Body**:
+
 ```typescript
 {
   folder?: 'episodes' | 'reels' | 'images' | 'PDF';  // Optional, defaults to 'images'
@@ -605,119 +857,410 @@ string // "Hello World!"
 ```
 
 **Files**:
+
 - `file`: File (required)
   - Max size: 100MB
   - Allowed types: jpg, jpeg, png, gif, pdf, mp4, mov, avi, mp3, wav
 
 **Response**:
+
 ```typescript
 {
   success: true;
   message: 'File uploaded successfully';
   data: {
-    key: string;    // S3 object key
-    url: string;    // CloudFront URL
-  };
+    key: string; // S3 object key
+    url: string; // CloudFront URL
+  }
 }
 ```
 
 ---
 
 ### POST `/upload/episode`
+
 **Description**: Upload an episode video file to S3  
 **Authentication**: None  
 **Request Type**: `multipart/form-data`  
 **Files**:
+
 - `file`: Video file (required)
   - Max size: 500MB
   - Allowed types: mp4, mov, avi, mkv
 
 **Response**:
+
 ```typescript
 {
   success: true;
   message: 'Episode uploaded successfully';
   data: {
-    key: string;    // S3 object key (in episodes folder)
-    url: string;    // CloudFront URL
-  };
+    key: string; // S3 object key (in episodes folder)
+    url: string; // CloudFront URL
+  }
 }
 ```
 
 ---
 
 ### POST `/upload/reel`
+
 **Description**: Upload a reel video file to S3  
 **Authentication**: None  
 **Request Type**: `multipart/form-data`  
 **Files**:
+
 - `file`: Video file (required)
   - Max size: 100MB
   - Allowed types: mp4, mov
 
 **Response**:
+
 ```typescript
 {
   success: true;
   message: 'Reel uploaded successfully';
   data: {
-    key: string;    // S3 object key (in reels folder)
-    url: string;    // CloudFront URL
-  };
+    key: string; // S3 object key (in reels folder)
+    url: string; // CloudFront URL
+  }
 }
 ```
 
 ---
 
 ### POST `/upload/image`
+
 **Description**: Upload an image file to S3  
 **Authentication**: None  
 **Request Type**: `multipart/form-data`  
 **Files**:
+
 - `file`: Image file (required)
   - Max size: 10MB
   - Allowed types: jpg, jpeg, png, gif, webp
 
 **Response**:
+
 ```typescript
 {
   success: true;
   message: 'Image uploaded successfully';
   data: {
-    key: string;    // S3 object key (in images folder)
-    url: string;    // CloudFront URL
-  };
+    key: string; // S3 object key (in images folder)
+    url: string; // CloudFront URL
+  }
 }
 ```
 
 ---
 
 ### POST `/upload/pdf`
+
 **Description**: Upload a PDF file to S3  
 **Authentication**: None  
 **Request Type**: `multipart/form-data`  
 **Files**:
+
 - `file`: PDF file (required)
   - Max size: 20MB
   - Allowed types: pdf
 
 **Response**:
+
 ```typescript
 {
   success: true;
   message: 'PDF uploaded successfully';
   data: {
-    key: string;    // S3 object key (in PDF folder)
-    url: string;    // CloudFront URL
-  };
+    key: string; // S3 object key (in PDF folder)
+    url: string; // CloudFront URL
+  }
 }
 ```
+
+---
+
+## 9. News Controller (`/news`)
+
+### POST `/news`
+
+**Description**: Create a new news item with thumbnail  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Request Type**: `multipart/form-data`  
+**Request Body** (`CreateNewsDto`):
+
+```typescript
+{
+  title: string; // Required
+  projectId: string; // MongoDB ObjectId (required)
+  developer: string; // Required
+}
+```
+
+**Files**:
+
+- `image`: Thumbnail image file (required)
+
+**Response**:
+
+```typescript
+{
+  _id: string;
+  title: string;
+  thumbnail: string; // S3 CloudFront URL
+  projectId: string; // Populated Project object
+  developer: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+---
+
+### GET `/news`
+
+**Description**: Get all news items  
+**Authentication**: None  
+**Request**: None  
+**Response**: Array of news objects with populated project references
+
+---
+
+### GET `/news/:id`
+
+**Description**: Get a news item by ID  
+**Authentication**: None  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: News object with populated project reference
+
+---
+
+### PATCH `/news/:id`
+
+**Description**: Update a news item  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Request Type**: `multipart/form-data` (optional file)  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Request Body** (`UpdateNewsDto` - all fields optional):
+
+```typescript
+{
+  title?: string;
+  projectId?: string;             // MongoDB ObjectId
+  developer?: string;
+}
+```
+
+**Files**:
+
+- `image`: Thumbnail image file (optional)
+
+**Response**: Updated news object with populated project reference
+
+---
+
+### DELETE `/news/:id`
+
+**Description**: Delete a news item (removes thumbnail from S3)  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: Deleted news object
+
+---
+
+## 10. Files Controller (`/files`)
+
+### POST `/files/upload/inventory`
+
+**Description**: Upload an inventory file to S3  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Request Type**: `multipart/form-data`  
+**Request Body** (`CreateInventoryDto`):
+
+```typescript
+{
+  projectId: string;              // MongoDB ObjectId (required)
+  description?: string;           // Optional
+}
+```
+
+**Files**:
+
+- `inventory`: Inventory file (required)
+  - Supported formats: pdf, xlsx, csv, etc.
+
+**Response**:
+
+```typescript
+{
+  _id: string;
+  projectId: string;              // Populated Project object
+  fileUrl: string;                // S3 CloudFront URL
+  fileName: string;
+  s3Key: string;                  // S3 object key
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+---
+
+### POST `/files/upload/pdf`
+
+**Description**: Upload a PDF file to S3  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Request Type**: `multipart/form-data`  
+**Request Body** (`CreatePdfDto`):
+
+```typescript
+{
+  projectId: string; // MongoDB ObjectId (required)
+  title: string; // Required
+}
+```
+
+**Files**:
+
+- `PDF`: PDF file (required)
+  - Max size: 20MB
+
+**Response**:
+
+```typescript
+{
+  _id: string;
+  projectId: string; // Populated Project object
+  fileUrl: string; // S3 CloudFront URL
+  fileName: string;
+  title: string;
+  s3Key: string; // S3 object key
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+---
+
+### GET `/files/get/inventory`
+
+**Description**: Get all inventory files  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Request**: None  
+**Response**: Array of inventory objects with populated project references
+
+---
+
+### GET `/files/get/inventory/:id`
+
+**Description**: Get an inventory file by ID  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: Inventory object with populated project reference
+
+---
+
+### GET `/files/get/pdf`
+
+**Description**: Get all PDF files  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Request**: None  
+**Response**: Array of PDF objects with populated project references
+
+---
+
+### GET `/files/get/pdf/:id`
+
+**Description**: Get a PDF file by ID  
+**Authentication**: Required (`AuthGuard`)  
+**Required Role**: Any authenticated user  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: PDF object with populated project reference
+
+---
+
+### DELETE `/files/delete/inventory/:id`
+
+**Description**: Delete an inventory file (removes from S3)  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: Deletion confirmation
+
+---
+
+### DELETE `/files/delete/pdf/:id`
+
+**Description**: Delete a PDF file (removes from S3)  
+**Authentication**: Required (`AuthGuard`, `RolesGuard`)  
+**Required Role**: `ADMIN` or `SUPERADMIN`  
+**Route Parameters** (`MongoIdDto`):
+
+```typescript
+{
+  id: string; // Valid MongoDB ObjectId (required)
+}
+```
+
+**Response**: Deletion confirmation
 
 ---
 
 ## Response Entities
 
 ### User Entity
+
 ```typescript
 {
   _id: string;
@@ -733,6 +1276,7 @@ string // "Hello World!"
 ```
 
 ### Project Entity
+
 ```typescript
 {
   _id: string;
@@ -759,6 +1303,7 @@ string // "Hello World!"
 ```
 
 ### Developer Entity
+
 ```typescript
 {
   _id: string;
@@ -775,6 +1320,7 @@ string // "Hello World!"
 ```
 
 ### Episode Entity
+
 ```typescript
 {
   _id: string;
@@ -785,6 +1331,68 @@ string // "Hello World!"
   episodeOrder: string;
   duration?: string;
   s3Key: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Reel Entity
+
+```typescript
+{
+  _id: string;
+  title: string;
+  description?: string;
+  videoUrl: string;          // S3 URL to video
+  thumbnail: string;         // S3 URL to thumbnail
+  projectId?: string | Project;  // ObjectId or populated Project
+  s3VideoKey: string;        // S3 key for video
+  s3ThumbnailKey: string;    // S3 key for thumbnail
+  savedBy?: string[];        // Array of User ObjectIds
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### News Entity
+
+```typescript
+{
+  _id: string;
+  title: string;
+  thumbnail: string; // S3 CloudFront URL
+  projectId: string | Project; // ObjectId or populated Project
+  developer: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Inventory Entity
+
+```typescript
+{
+  _id: string;
+  projectId: string | Project;   // ObjectId or populated Project
+  fileUrl: string;               // S3 CloudFront URL
+  fileName: string;
+  s3Key: string;                 // S3 object key
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### File Entity (PDF)
+
+```typescript
+{
+  _id: string;
+  projectId: string | Project; // ObjectId or populated Project
+  fileUrl: string; // S3 CloudFront URL
+  fileName: string;
+  title: string;
+  s3Key: string; // S3 object key
   createdAt: Date;
   updatedAt: Date;
 }
