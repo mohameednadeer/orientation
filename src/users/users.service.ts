@@ -92,6 +92,43 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Update OTP fields for email verification or password reset
+   */
+  async updateOTP(
+    id: string,
+    otpData: {
+      emailVerificationOTP?: string | null;
+      emailVerificationOTPExpires?: Date | null;
+      passwordResetOTP?: string | null;
+      passwordResetOTPExpires?: Date | null;
+      isEmailVerified?: boolean;
+    },
+  ) {
+    const user = await this.userModel.findByIdAndUpdate(id, otpData, {
+      new: true,
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  /**
+   * Update user password
+   */
+  async updatePassword(id: string, hashedPassword: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      id,
+      { password: hashedPassword },
+      { new: true },
+    );
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async update(id: Types.ObjectId, updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, {

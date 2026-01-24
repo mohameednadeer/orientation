@@ -30,6 +30,23 @@ export class User {
     enum: ['user', 'admin', 'developer', 'superadmin'],
   })
   role: string;
+
+  // Email Verification
+  @Prop({ default: false })
+  isEmailVerified: boolean;
+
+  @Prop({ required: false })
+  emailVerificationOTP: string;
+
+  @Prop({ required: false })
+  emailVerificationOTPExpires: Date;
+
+  // Password Reset
+  @Prop({ required: false })
+  passwordResetOTP: string;
+
+  @Prop({ required: false })
+  passwordResetOTPExpires: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

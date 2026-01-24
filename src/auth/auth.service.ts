@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -8,6 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
+import { EmailService } from 'src/email/email.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import {
@@ -23,6 +25,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
     @InjectModel(RefreshToken.name)
     private readonly refreshTokenModel: Model<RefreshTokenDocument>,
   ) {}
@@ -43,7 +46,8 @@ export class AuthService {
     role: string;
   }): string {
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const expiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m';
+    const expiresIn =
+      this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m';
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: expiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
@@ -59,7 +63,8 @@ export class AuthService {
     role: string;
   }): string {
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const expiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+    const expiresIn =
+      this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       expiresIn: expiresIn as `${number}${'s' | 'm' | 'h' | 'd'}`,
@@ -78,7 +83,8 @@ export class AuthService {
     const hashedToken = this.hashToken(refreshToken);
 
     // Calculate expiry date based on JWT_REFRESH_EXPIRES_IN
-    const expiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+    const expiresIn =
+      this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
     const expiresAt = this.calculateExpiryDate(expiresIn);
 
     await this.refreshTokenModel.create({
@@ -119,6 +125,13 @@ export class AuthService {
   }
 
   /**
+   * Get OTP expiry time in minutes from config (default: 2 minutes)
+   */
+  private getOtpExpiryMinutes(): number {
+    return this.configService.get<number>('OTP_EXPIRY_MINUTES') || 2;
+  }
+
+  /**
    * Login user and return access + refresh tokens
    */
   async login(loginDto: LoginDto, deviceInfo?: string, ipAddress?: string) {
@@ -140,6 +153,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException(
+        'Please verify your email before logging in',
+      );
+    }
+
     const userPayload = {
       id: user._id.toString(),
       email: user.email,
@@ -157,24 +177,37 @@ export class AuthService {
       ipAddress,
     );
 
-    // Exclude password from response
-    const { password, ...userWithoutPassword } = user.toObject();
+    // Exclude password and OTP fields from response
+    const {
+      password,
+      emailVerificationOTP,
+      emailVerificationOTPExpires,
+      passwordResetOTP,
+      passwordResetOTPExpires,
+      ...userWithoutSensitiveData
+    } = user.toObject();
 
     return {
-      user: userWithoutPassword,
+      user: userWithoutSensitiveData,
       accessToken,
       refreshToken,
     };
   }
 
   /**
-   * Register new user and return access + refresh tokens
+   * Register new user and send verification OTP
    */
-  async register(registerDto: RegisterDto, deviceInfo?: string, ipAddress?: string) {
+  async register(registerDto: RegisterDto) {
     const userExists = await this.usersService.findByEmail(registerDto.email);
     if (userExists) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException('Email already registered');
     }
+
+    // Generate OTP
+    const otp = this.emailService.generateOTP();
+    const otpExpires = new Date(
+      Date.now() + this.getOtpExpiryMinutes() * 60 * 1000,
+    );
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     const newUser = await this.usersService.create({
@@ -182,39 +215,210 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const userPayload = {
-      id: newUser.user._id.toString(),
-      email: newUser.user.email,
-      role: newUser.user.role,
-    };
+    // Save OTP to user
+    await this.usersService.updateOTP(newUser.user._id.toString(), {
+      emailVerificationOTP: otp,
+      emailVerificationOTPExpires: otpExpires,
+    });
 
-    const accessToken = this.generateAccessToken(userPayload);
-    const refreshToken = this.generateRefreshToken(userPayload);
-
-    // Store refresh token in database
-    await this.storeRefreshToken(
-      newUser.user._id.toString(),
-      refreshToken,
-      deviceInfo,
-      ipAddress,
-    );
-
-    // Exclude password from response
-    const { password, ...userWithoutPassword } = newUser.user.toObject();
+    // Send OTP email
+    await this.emailService.sendVerificationOTP(registerDto.email, otp);
 
     return {
-      user: userWithoutPassword,
-      accessToken,
-      refreshToken,
+      success: true,
+      message:
+        'Registration successful. Please check your email for verification code.',
+      email: registerDto.email,
+    };
+  }
+
+  /**
+   * Verify email with OTP
+   */
+  async verifyEmail(email: string, otp: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email already verified');
+    }
+
+    if (!user.emailVerificationOTP) {
+      throw new BadRequestException(
+        'No verification code found. Please request a new one.',
+      );
+    }
+
+    if (user.emailVerificationOTP !== otp) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    if (
+      user.emailVerificationOTPExpires &&
+      new Date() > user.emailVerificationOTPExpires
+    ) {
+      throw new BadRequestException('Verification code has expired');
+    }
+
+    // Mark email as verified and clear OTP
+    await this.usersService.updateOTP(user._id.toString(), {
+      isEmailVerified: true,
+      emailVerificationOTP: null,
+      emailVerificationOTPExpires: null,
+    });
+
+    return {
+      success: true,
+      message: 'Email verified successfully',
+    };
+  }
+
+  /**
+   * Resend verification OTP
+   */
+  async resendVerificationOTP(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email already verified');
+    }
+
+    // Generate new OTP
+    const otp = this.emailService.generateOTP();
+    const otpExpires = new Date(
+      Date.now() + this.getOtpExpiryMinutes() * 60 * 1000,
+    );
+
+    await this.usersService.updateOTP(user._id.toString(), {
+      emailVerificationOTP: otp,
+      emailVerificationOTPExpires: otpExpires,
+    });
+
+    await this.emailService.sendVerificationOTP(email, otp);
+
+    return {
+      success: true,
+      message: 'Verification code sent to your email',
+    };
+  }
+
+  /**
+   * Forgot password - send reset OTP
+   */
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      // Don't reveal if user exists for security
+      return {
+        success: true,
+        message: 'If your email is registered, you will receive a reset code',
+      };
+    }
+
+    // Generate OTP
+    const otp = this.emailService.generateOTP();
+    const otpExpires = new Date(
+      Date.now() + this.getOtpExpiryMinutes() * 60 * 1000,
+    );
+
+    await this.usersService.updateOTP(user._id.toString(), {
+      passwordResetOTP: otp,
+      passwordResetOTPExpires: otpExpires,
+    });
+
+    await this.emailService.sendPasswordResetOTP(email, otp);
+
+    return {
+      success: true,
+      message: 'Password reset code sent to your email',
+    };
+  }
+
+  /**
+   * Verify reset OTP (optional - verify before allowing password change)
+   */
+  async verifyResetOTP(email: string, otp: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.passwordResetOTP) {
+      throw new BadRequestException('No reset code found');
+    }
+
+    if (user.passwordResetOTP !== otp) {
+      throw new BadRequestException('Invalid reset code');
+    }
+
+    if (
+      user.passwordResetOTPExpires &&
+      new Date() > user.passwordResetOTPExpires
+    ) {
+      throw new BadRequestException('Reset code has expired');
+    }
+
+    return {
+      success: true,
+      message: 'OTP verified. You can now reset your password.',
+    };
+  }
+
+  /**
+   * Reset password with OTP
+   */
+  async resetPassword(email: string, otp: string, newPassword: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.passwordResetOTP) {
+      throw new BadRequestException('No reset code found');
+    }
+
+    if (user.passwordResetOTP !== otp) {
+      throw new BadRequestException('Invalid reset code');
+    }
+
+    if (
+      user.passwordResetOTPExpires &&
+      new Date() > user.passwordResetOTPExpires
+    ) {
+      throw new BadRequestException('Reset code has expired');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear OTP
+    await this.usersService.updatePassword(user._id.toString(), hashedPassword);
+    await this.usersService.updateOTP(user._id.toString(), {
+      passwordResetOTP: null,
+      passwordResetOTPExpires: null,
+    });
+
+    // Revoke all refresh tokens for security
+    await this.revokeAllUserTokens(user._id.toString());
+
+    return {
+      success: true,
+      message: 'Password reset successfully',
     };
   }
 
   /**
    * Refresh tokens with rotation (single-use refresh tokens)
-   * - Validates the refresh token
-   * - Deletes the old refresh token (invalidates it)
-   * - Generates new access + refresh tokens
-   * - Stores the new refresh token
    */
   async refreshTokens(
     refreshToken: string,

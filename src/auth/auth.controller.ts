@@ -23,21 +23,23 @@ interface AuthenticatedRequest extends Request {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // ==================== AUTHENTICATION ====================
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
   login(@Body() loginDto: LoginDto, @Req() req: AuthenticatedRequest) {
     const deviceInfo = req.headers['user-agent'];
     const ipAddress =
-      (req.headers['x-forwarded-for'] as string) || req.ip || req.socket.remoteAddress;
+      (req.headers['x-forwarded-for'] as string) ||
+      req.ip ||
+      req.socket.remoteAddress;
     return this.authService.login(loginDto, deviceInfo, ipAddress);
   }
 
   @Post('register')
-  register(@Body() registerDto: RegisterDto, @Req() req: AuthenticatedRequest) {
-    const deviceInfo = req.headers['user-agent'];
-    const ipAddress =
-      (req.headers['x-forwarded-for'] as string) || req.ip || req.socket.remoteAddress;
-    return this.authService.register(registerDto, deviceInfo, ipAddress);
+  @HttpCode(HttpStatus.CREATED)
+  register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
   @Post('refresh')
@@ -45,8 +47,14 @@ export class AuthController {
   refresh(@Body() body: RefreshTokenDto, @Req() req: AuthenticatedRequest) {
     const deviceInfo = req.headers['user-agent'];
     const ipAddress =
-      (req.headers['x-forwarded-for'] as string) || req.ip || req.socket.remoteAddress;
-    return this.authService.refreshTokens(body.refreshToken, deviceInfo, ipAddress);
+      (req.headers['x-forwarded-for'] as string) ||
+      req.ip ||
+      req.socket.remoteAddress;
+    return this.authService.refreshTokens(
+      body.refreshToken,
+      deviceInfo,
+      ipAddress,
+    );
   }
 
   @Post('logout')
@@ -68,5 +76,43 @@ export class AuthController {
   getActiveSessions(@Req() req: AuthenticatedRequest) {
     const userId = req.user?.sub;
     return this.authService.getActiveSessions(userId!);
+  }
+
+  // ==================== EMAIL VERIFICATION ====================
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  verifyEmail(@Body('email') email: string, @Body('otp') otp: string) {
+    return this.authService.verifyEmail(email, otp);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  resendVerificationOTP(@Body('email') email: string) {
+    return this.authService.resendVerificationOTP(email);
+  }
+
+  // ==================== PASSWORD RESET ====================
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('verify-reset-otp')
+  @HttpCode(HttpStatus.OK)
+  verifyResetOTP(@Body('email') email: string, @Body('otp') otp: string) {
+    return this.authService.verifyResetOTP(email, otp);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  resetPassword(
+    @Body('email') email: string,
+    @Body('otp') otp: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.authService.resetPassword(email, otp, newPassword);
   }
 }

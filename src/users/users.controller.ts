@@ -17,7 +17,6 @@ import { Role } from 'src/roles/roles.enum';
 import { Roles } from 'src/roles/roles.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/roles/roles.guard';
-import { post } from 'axios';
 import { CreateDeveloperDto } from './dto/create-developer.dto';
 
 @Controller('users')

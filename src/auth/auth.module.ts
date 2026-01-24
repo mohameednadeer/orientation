@@ -6,6 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthGuard } from './auth.guard';
+import { EmailModule } from 'src/email/email.module';
 import {
   RefreshToken,
   RefreshTokenSchema,
@@ -20,13 +21,12 @@ import {
       global: true,
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        // Use access token secret as default for JwtModule
-        // We'll use custom secrets for access/refresh tokens in the service
         const secret = configService.get<string>('JWT_ACCESS_SECRET');
         if (!secret) {
           throw new Error('JWT_ACCESS_SECRET is not defined');
         }
-        const expiresIn = configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m';
+        const expiresIn =
+          configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m';
         return {
           secret,
           signOptions: {
@@ -37,6 +37,7 @@ import {
       inject: [ConfigService],
     }),
     forwardRef(() => UsersModule),
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthGuard],
